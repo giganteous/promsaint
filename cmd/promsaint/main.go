@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 
+	log "github.com/Sirupsen/logrus"
+	_ "github.com/cloudflare/promsaint/backends" // i want it to be in global namespace?
 	_ "github.com/cloudflare/promsaint/logging"
 	"github.com/cloudflare/promsaint/server"
-	log "github.com/Sirupsen/logrus"
 )
 
 var (

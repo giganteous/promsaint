@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/cloudflare/promsaint/models"
 	"github.com/cloudflare/promsaint/utils"
-	log "github.com/Sirupsen/logrus"
 	prometheus "github.com/prometheus/common/model"
 )
 
@@ -83,9 +83,11 @@ func (set *BasicBackend) Prune() {
 	log.Debugln("Running Prune")
 	for key, value := range set.data {
 		if !value.PrometheusAlert.EndsAt.IsZero() && time.Now().UTC().Sub(value.PrometheusAlert.EndsAt) > *pruneTimeout {
+			log.Debugf("removing %X; it was resolved by nagios, and prune timeout %s passed", key, *pruneTimeout)
 			DatabasePruned.WithLabelValues("resolved").Inc()
 			delete(set.data, key)
 		} else if time.Now().UTC().Sub(value.Metadata.LastUpdate) > *forgetTimeout {
+			log.Debugf("removing %X; no repetition from nagios; forget timeout %s passed", key, *forgetTimeout)
 			DatabasePruned.WithLabelValues("forgotten").Inc()
 			delete(set.data, key)
 		}
